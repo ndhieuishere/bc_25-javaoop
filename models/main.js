@@ -2,6 +2,7 @@
 function getEle(id) {
   return document.getElementById(id);
 }
+var validation = new Validation();
 
 function layThongTinNhanVien() {
   // lấy dữ liệu từ local storage
@@ -12,26 +13,126 @@ function layThongTinNhanVien() {
   var _email = getEle("email").value;
   var _password = getEle("password").value;
   var _ngayLam = getEle("datepicker").value;
-  var _luongCB = getEle("luongCB").value * 1;
+  var _luongCB = getEle("luongCB").value;
   var _chucVu = getEle("chucvu").value;
-  var _gioLam = getEle("gioLam").value * 1;
+  var _gioLam = getEle("gioLam").value;
 
-  //   tạo đối tượng nv từ lớp đối tượng nvien
-  var nhanVien = new NhanVien(
-    _taiKhoan,
-    _hoVaTen,
-    _email,
-    _password,
-    _ngayLam,
-    _luongCB,
+  // cờ check valid
+  var isValid = true;
+  isValid &=
+    validation.kiemTraRong(
+      _taiKhoan,
+      "errorTaiKhoan",
+      "(*)Vui lòng nhập tài khoản"
+    ) &&
+    validation.kiemTraDoDaiKiTu(
+      _taiKhoan,
+      "errorTaiKhoan",
+      "(*)Vui lòng nhập tài khoản có độ dài 4-6 kí tự",
+      4,
+      6
+    ) &&
+    validation.kiemTraTrungTaiKhoan(
+      _taiKhoan,
+      "errorTaiKhoan",
+      "tài khoản đã tồn tại vui lòng nhập tài khoản khác",
+      dsnv.arr
+    ) &&
+    validation.kiemTraKiTuLaSo(
+      _taiKhoan,
+      "errorTaiKhoan",
+      "Vui lòng nhập tài khoản ở định dạng chữ số"
+    );
+  isValid &=
+    validation.kiemTraRong(
+      _hoVaTen,
+      "errorHoVaTen",
+      "(*)Vui lòng nhập họ và tên"
+    ) &&
+    validation.kiemTraChuoiKiTu(
+      _hoVaTen,
+      "errorHoVaTen",
+      "(*)Vui lòng nhập họ và tên"
+    );
+  isValid &=
+    validation.kiemTraRong(_email, "errorEmail", "(*)Vui lòng nhập email") &&
+    validation.kiemTraEmail(
+      _email,
+      "errorEmail",
+      "(*)Vui lòng nhập email đúng định dạng"
+    );
+  isValid &=
+    validation.kiemTraRong(
+      _password,
+      "errorMatKhau",
+      "(*)Vui lòng nhập mật khẩu"
+    ) &&
+    validation.kiemTraMatKhau(
+      _password,
+      "errorMatKhau",
+      "(*)Vui lòng nhập mật khẩu chứa ít nhất 1 ký tự số, 1 ký tự in hoa, 1 ký tự đặc biệt"
+    );
+  isValid &=
+    validation.kiemTraRong(
+      _ngayLam,
+      "errorNgayGio",
+      "(*)Vui lòng nhập ngày làm"
+    ) &&
+    validation.kiemTraNgayThang(
+      _ngayLam,
+      "errorNgayGio",
+      "(*)Vui lòng nhập ngày làm theo định dạng mm/dd/yyyy"
+    );
+  isValid &=
+    validation.kiemTraRong(
+      _luongCB,
+      "errorLuongCoBan",
+      "(*)Vui lòng nhập lương cơ bản"
+    ) &&
+    validation.kiemTraLuongCB(
+      _luongCB,
+      "errorLuongCoBan",
+      "(*)Vui lòng nhập lương cơ bản trong khoảng 1.000.000 - 20.000.000,",
+      1000000,
+      20000000
+    );
+  isValid &= validation.kiemTraChucVu(
     _chucVu,
-    _gioLam
+    "errorChucVu",
+    "(*)Vui lòng chọn chức vụ phù hợp"
   );
-  //   gọi phương thức tính tổng lương đã thiết kế bên lớp đối tượng nhân viên
-  nhanVien.tinhTongLuong(_chucVu, _luongCB);
-  //   gọi phương thức tính xếp loại đã thiết kế bên lớp đối tượng nhân viên
-  nhanVien.tinhXepLoai(_gioLam);
-  return nhanVien;
+  isValid &=
+    validation.kiemTraRong(
+      _gioLam,
+      "errorGioLam",
+      "(*)Vui lòng nhập giờ làm"
+    ) &&
+    validation.kiemTraSoGio(
+      _gioLam,
+      "errorGioLam",
+      "(*)Vui lòng nhập giờ làm trong khoảng 80-200 giờ",
+      80,
+      200
+    );
+  if (isValid) {
+    //   tạo đối tượng nv từ lớp đối tượng nvien
+    var nhanVien = new NhanVien(
+      _taiKhoan,
+      _hoVaTen,
+      _email,
+      _password,
+      _ngayLam,
+      _luongCB,
+      _chucVu,
+      _gioLam
+    );
+    //   gọi phương thức tính tổng lương đã thiết kế bên lớp đối tượng nhân viên
+    nhanVien.tinhTongLuong(_chucVu, _luongCB);
+    //   gọi phương thức tính xếp loại đã thiết kế bên lớp đối tượng nhân viên
+    nhanVien.tinhXepLoai(_gioLam);
+    return nhanVien;
+  }
+  return null;
 }
 
 // tạo đối tượng dsnv từ lớp đối tượng dsnv
@@ -85,11 +186,13 @@ getLocalStorage();
 getEle("btnThemNV").addEventListener("click", function () {
   // gán cho phương thức lấy thông tin nv ở trên 1 giá trị nv
   var nhanVien = layThongTinNhanVien();
-  //   gọi phương thức thêm nv bên lớp đối tượng dsnv
-  dsnv.themNhanVien(nhanVien);
-  //   gọi phương thức tạo bảng đã tạo ở trên
-  taoBang(dsnv.arr);
-  setLocalStorage();
+  if (nhanVien) {
+    //   gọi phương thức thêm nv bên lớp đối tượng dsnv
+    dsnv.themNhanVien(nhanVien);
+    //   gọi phương thức tạo bảng đã tạo ở trên
+    taoBang(dsnv.arr);
+    setLocalStorage();
+  }
 });
 // xóa nv
 function xoaNV(taiKhoan) {

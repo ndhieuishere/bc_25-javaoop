@@ -100,6 +100,19 @@ function Validation(value) {
     getEle(divId).style.display = "none";
     return true;
   };
+  this.kiemTraKiTuLaSo = function (value, divId, mess) {
+    var letter = /^[0-9]+$/;
+    if (value.match(letter)) {
+      // hợp lệ
+      getEle(divId).innerHTML = "";
+      getEle(divId).style.display = "none";
+      return true;
+    }
+    getEle(divId).innerHTML = mess;
+    getEle(divId).style.display = "block";
+    return false;
+  };
+
   this.kiemTraLuongCB = function (value, divId, mess, min, max) {
     var number = /^[0-9]+$/;
     if (
