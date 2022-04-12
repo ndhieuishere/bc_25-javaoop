@@ -48,5 +48,14 @@ function DanhSachNhanVien() {
       this.arr[index] = nhanVien;
     }
   };
-  this.timNhanVien = function () {};
+  this.timNhanVien = function (keyword) {
+    var mangTimKiem = [];
+    for (var i = 0; i < this.arr.length; i++) {
+      var nhanVien = this.arr[i];
+      if (nhanVien.xepLoai.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
+        mangTimKiem.push(nhanVien);
+      }
+    }
+    return mangTimKiem;
+  };
 }

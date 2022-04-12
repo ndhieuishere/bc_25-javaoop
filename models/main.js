@@ -97,7 +97,7 @@ function xoaNV(taiKhoan) {
   taoBang(dsnv.arr);
   setLocalStorage();
 }
-// sửa nv 
+// sửa nv
 function suaNV(taiKhoan) {
   getEle("btnCapNhat").style.display = "inline-block";
   var nhanVien = dsnv.layThongTinNV(taiKhoan);
@@ -116,5 +116,12 @@ getEle("btnCapNhat").onclick = function capNhatNhanVien() {
   var nhanVien = layThongTinNhanVien();
   dsnv.capNhatNhanVien(nhanVien);
   taoBang(dsnv.arr);
-  setLocalStorage()
+  setLocalStorage();
 };
+
+// tìm kiếm nv
+getEle("searchName").addEventListener("keyup", function () {
+  var keyword = getEle("searchName").value;
+  var mangTimKiem = dsnv.timNhanVien(keyword);
+  taoBang(mangTimKiem);
+});
