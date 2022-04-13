@@ -4,6 +4,108 @@ function getEle(id) {
 }
 var validation = new Validation();
 
+function layThongTinNhanVienDeCapNhat() {
+  var _taiKhoan = getEle("tknv").value;
+  var _hoVaTen = getEle("name").value;
+  var _email = getEle("email").value;
+  var _password = getEle("password").value;
+  var _ngayLam = getEle("datepicker").value;
+  var _luongCB = getEle("luongCB").value;
+  var _chucVu = getEle("chucvu").value;
+  var _gioLam = getEle("gioLam").value;
+  var isValid = true;
+  isValid &=
+    validation.kiemTraRong(
+      _hoVaTen,
+      "errorHoVaTen",
+      "(*)Vui lòng nhập họ và tên"
+    ) &&
+    validation.kiemTraChuoiKiTu(
+      _hoVaTen,
+      "errorHoVaTen",
+      "(*)Vui lòng nhập họ và tên theo định dạng kí tự"
+    );
+  isValid &=
+    validation.kiemTraRong(_email, "errorEmail", "(*)Vui lòng nhập email") &&
+    validation.kiemTraEmail(
+      _email,
+      "errorEmail",
+      "(*)Vui lòng nhập email đúng định dạng"
+    );
+  isValid &=
+    validation.kiemTraRong(
+      _password,
+      "errorMatKhau",
+      "(*)Vui lòng nhập mật khẩu"
+    ) &&
+    validation.kiemTraMatKhau(
+      _password,
+      "errorMatKhau",
+      "(*)Vui lòng nhập mật khẩu chứa ít nhất 1 ký tự số, 1 ký tự in hoa, 1 ký tự đặc biệt"
+    );
+  isValid &=
+    validation.kiemTraRong(
+      _ngayLam,
+      "errorNgayGio",
+      "(*)Vui lòng nhập ngày làm"
+    ) &&
+    validation.kiemTraNgayThang(
+      _ngayLam,
+      "errorNgayGio",
+      "(*)Vui lòng nhập ngày làm theo định dạng mm/dd/yyyy"
+    );
+  isValid &=
+    validation.kiemTraRong(
+      _luongCB,
+      "errorLuongCoBan",
+      "(*)Vui lòng nhập lương cơ bản"
+    ) &&
+    validation.kiemTraLuongCB(
+      _luongCB,
+      "errorLuongCoBan",
+      "(*)Vui lòng nhập lương cơ bản trong khoảng 1.000.000 - 20.000.000,",
+      1000000,
+      20000000
+    );
+  isValid &= validation.kiemTraChucVu(
+    _chucVu,
+    "errorChucVu",
+    "(*)Vui lòng chọn chức vụ phù hợp"
+  );
+  isValid &=
+    validation.kiemTraRong(
+      _gioLam,
+      "errorGioLam",
+      "(*)Vui lòng nhập giờ làm"
+    ) &&
+    validation.kiemTraSoGio(
+      _gioLam,
+      "errorGioLam",
+      "(*)Vui lòng nhập giờ làm trong khoảng 80-200 giờ",
+      80,
+      200
+    );
+  if (isValid) {
+    //   tạo đối tượng nv từ lớp đối tượng nvien
+    var nhanVien = new NhanVien(
+      _taiKhoan,
+      _hoVaTen,
+      _email,
+      _password,
+      _ngayLam,
+      _luongCB,
+      _chucVu,
+      _gioLam
+    );
+    //   gọi phương thức tính tổng lương đã thiết kế bên lớp đối tượng nhân viên
+    nhanVien.tinhTongLuong(_chucVu, _luongCB);
+    //   gọi phương thức tính xếp loại đã thiết kế bên lớp đối tượng nhân viên
+    nhanVien.tinhXepLoai(_gioLam);
+    return nhanVien;
+  }
+  return null;
+}
+
 function layThongTinNhanVien() {
   // lấy dữ liệu từ local storage
 
@@ -154,7 +256,7 @@ function taoBang(arr) {
     <td>
     <button class="btn btn-danger" onclick="xoaNV('${nv.taiKhoan}')">Xóa</button></td>
     <td>
-    <button class="btn btn-warning" onclick="suaNV('${nv.taiKhoan}')">Sửa</button></td>
+    <button id="disabled" class="btn btn-warning" onclick="suaNV('${nv.taiKhoan}')">Sửa</button></td>
     </tr>`;
   }
   getEle("tableDanhSach").innerHTML = content;
@@ -216,10 +318,13 @@ function suaNV(taiKhoan) {
 }
 // cập nhật nhân viên
 getEle("btnCapNhat").onclick = function capNhatNhanVien() {
-  var nhanVien = layThongTinNhanVien();
-  dsnv.capNhatNhanVien(nhanVien);
-  taoBang(dsnv.arr);
-  setLocalStorage();
+  var nhanVien = layThongTinNhanVienDeCapNhat();
+  if (nhanVien) {
+    dsnv.capNhatNhanVien(nhanVien);
+    taoBang(dsnv.arr);
+    setLocalStorage();
+    getEle("tknv").disabled = true;
+  }
 };
 
 // tìm kiếm nv
